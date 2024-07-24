@@ -1,19 +1,17 @@
-""" Created on Mon Jul 22 17:22:50 2024
-    @author: dcupolillo """
-
 import matplotlib.pyplot as plt
 import torch
-import numpy as np
 
 
 def plot_loss_accuracy(
         train_loss,
         train_acc,
         validation_loss,
-        validation_acc
+        validation_acc,
+        hyperparameters
 ):
     """
-    Code to plot loss and accuracy
+    Code to plot loss and accuracy with best validation accuracy
+    and hyperparameters.
 
     Args:
       train_loss: list
@@ -24,6 +22,8 @@ def plot_loss_accuracy(
         Log of training accuracy
       validation_acc: list
         Log of validation accuracy
+      hyperparameters: dict
+        Model hyperparameters to display
 
     Returns:
       Nothing
@@ -40,7 +40,9 @@ def plot_loss_accuracy(
         validation_acc = validation_acc.cpu().tolist()
 
     epochs = len(train_loss)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15.5, 5.5))
+    best_val_acc_epoch = validation_acc.index(max(validation_acc))
+
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 5.5))
 
     ax1.plot(list(range(epochs)), train_loss, label='Training Loss')
     ax1.plot(list(range(epochs)), validation_loss, label='Validation Loss')
@@ -51,9 +53,24 @@ def plot_loss_accuracy(
 
     ax2.plot(list(range(epochs)), train_acc, label='Training Accuracy')
     ax2.plot(list(range(epochs)), validation_acc, label='Validation Accuracy')
+    ax2.scatter(
+        best_val_acc_epoch,
+        validation_acc[best_val_acc_epoch],
+        color='red',
+        label=f'Best Val Acc ({validation_acc[best_val_acc_epoch]:.2f})')
     ax2.set_xlabel('Epochs')
     ax2.set_ylabel('Accuracy')
     ax2.set_title('Epoch vs Accuracy')
     ax2.legend()
 
-    plt.show()
+    # Hyperparameters plot
+    ax3.axis('off')
+    hyperparams_text = '\n'.join([f'{key}: {value}'
+                                  for key, value in hyperparameters.items()])
+    ax3.text(
+        0.5, 0.5,
+        hyperparams_text,
+        horizontalalignment='center',
+        verticalalignment='center',
+        fontsize=12)
+
